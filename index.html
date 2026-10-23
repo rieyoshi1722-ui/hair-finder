@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ヘアスタイル検索</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@400;500&display=swap">
+<style>
+/* Layout: soft pink brand band on top, then one phone-first column of white rounded cards on light grey (gender tiles, option cards with EN label + divider, results grid, zoom sheet). */
+:root{
+  --bg:#F5F5F6;
+  --surface:#FFFFFF;
+  --tile:#F6F6F8;
+  --ink:#4A4A50;
+  --muted:#75757D;
+  --line:#E6E6EA;
+  --band:#F1D2D8;
+  --brand:#B8738A;
+  --en:#C27A8C;
+  --accent:#C77488;
+  --accent-soft:#F9E6EA;
+  --accent-ink:#FFFFFF;
+  --focus:#2A5BD7;
+  --scrim:rgba(40,30,34,.55);
+  --font-brand:"Playfair Display","Hiragino Mincho ProN","Noto Serif JP",serif;
+  --font-body:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16161A;--surface:#212126;--tile:#2A2A31;--ink:#E9E6E8;--muted:#A6A3AA;--line:#34343C;
+    --band:#3A2A30;--brand:#E2A2B3;--en:#E39AAB;--accent:#E58AA0;--accent-soft:#4A2E37;--accent-ink:#2A1017;
+    --focus:#7FA2FF;--scrim:rgba(0,0,0,.65);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16161A;--surface:#212126;--tile:#2A2A31;--ink:#E9E6E8;--muted:#A6A3AA;--line:#34343C;
+  --band:#3A2A30;--brand:#E2A2B3;--en:#E39AAB;--accent:#E58AA0;--accent-soft:#4A2E37;--accent-ink:#2A1017;
+  --focus:#7FA2FF;--scrim:rgba(0,0,0,.65);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.7;letter-spacing:.04em}
+button{font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.band{
+  background:var(--band);text-align:center;padding-block:18px 16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.brand{font-family:var(--font-brand);font-weight:400;font-size:19px;letter-spacing:.42em;color:var(--brand);margin:0;padding-left:.42em}
+
+.wrap{
+  max-width:720px;margin:0 auto;padding-block:22px 128px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+h1,h2{margin:0;line-height:1.5;text-wrap:balance}
+h1{font-size:20px;font-weight:700;text-align:center}
+.lead{margin:6px 0 22px;color:var(--muted);text-align:center;font-size:14px}
+.back{background:none;border:0;padding:6px 0;margin:0 0 6px;color:var(--muted);font-size:14px;min-height:44px}
+.back:hover{color:var(--ink)}
+
+/* cards */
+.card{background:var(--surface);border-radius:18px;padding:6px 16px 18px;margin:0 0 14px}
+.card-head{display:flex;justify-content:center;align-items:baseline;gap:14px;padding:14px 0 12px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.en{font-weight:700;font-size:13px;letter-spacing:.2em;color:var(--en);text-transform:uppercase}
+.jp{font-weight:700;font-size:16px;color:var(--ink)}
+
+/* step 1 */
+.genders{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gcard{
+  background:var(--surface);border:0;border-radius:18px;padding:12px 12px 16px;
+  display:flex;flex-direction:column;gap:8px;align-items:center;min-width:0;
+}
+.gcard:hover{background:var(--accent-soft)}
+.gcard svg{width:100%;height:auto;border-radius:12px;display:block}
+.gcard .en{margin-top:4px}
+.gcard .jp{font-size:18px}
+
+/* chips + swatches */
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{
+  min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);
+  display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;
+}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (min-width:480px){.swatches{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sw{
+  flex-direction:column;justify-content:center;gap:8px;border-radius:14px;border:1.5px solid transparent;background:var(--tile);
+  padding:12px 6px;min-height:84px;font-size:12px;text-align:center;line-height:1.4;
+}
+.sw[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:700}
+.dot{width:34px;height:34px;border-radius:50%;border:1px solid rgba(128,128,128,.45);flex:none}
+
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);
+  padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.bar-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.bar-text{font-size:13px;color:var(--muted);min-width:0;line-height:1.5}
+.bar-text b{color:var(--ink);font-weight:700}
+.go{
+  min-height:48px;padding:0 30px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);
+  font-weight:700;font-size:17px;letter-spacing:.2em;flex:none;
+}
+
+/* results */
+.count{text-align:center;padding:4px 0 2px}
+.count b{font-size:44px;font-weight:400;color:var(--muted);letter-spacing:0;line-height:1.2}
+.count span{font-size:17px;color:var(--muted);margin-left:6px}
+.sum{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 0}
+.tag{background:var(--tile);border-radius:999px;padding:2px 12px;font-size:13px}
+.query{font-size:13px;color:var(--muted);margin:12px 0 0;text-align:center;overflow-wrap:anywhere}
+.notice{background:var(--accent-soft);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--ink);margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile{padding:0;border:0;background:var(--surface);border-radius:16px;overflow:hidden;text-align:left;display:block;min-width:0}
+.tile:hover{background:var(--accent-soft)}
+.tile svg{display:block;width:100%;height:auto}
+.tile small{display:block;padding:6px 12px 10px;font-size:12px;color:var(--muted)}
+.skel{aspect-ratio:5/6;max-width:100%;border-radius:16px;background:var(--line);animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.5}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+
+/* zoom sheet */
+.backdrop{position:fixed;inset:0;z-index:20;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:600px){.backdrop{align-items:center}}
+.sheet{
+  background:var(--surface);width:100%;max-width:520px;max-height:94%;overflow:auto;
+  border-radius:22px 22px 0 0;padding:16px 16px 20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
+}
+@media (min-width:600px){.sheet{border-radius:22px}}
+.sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.x{min-height:44px;min-width:44px;border-radius:50%;border:0;background:var(--tile);font-size:18px;line-height:1}
+.sheet svg{display:block;width:100%;height:auto;max-height:52vh;border-radius:14px}
+.sheet .sum{justify-content:flex-start;margin-top:12px}
+.src{margin:10px 0 4px;font-size:13px;color:var(--muted)}
+.visit{
+  display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:999px;background:var(--accent);
+  color:var(--accent-ink);text-decoration:none;font-weight:700;font-size:16px;letter-spacing:.12em;margin-top:12px;
+}
+.small{font-size:12px;color:var(--muted);margin:8px 0 0}
+</style>
+</head>
+<body>
+
+
+<header class="band"><p class="brand">HAIR STYLE FINDER</p></header>
+
+<main class="wrap">
+  <section id="v-gender">
+    <h1>どんな髪型を さがしますか？</h1>
+    <p class="lead">まず、どちらかを えらんでください。</p>
+    <div class="genders" id="gender-cards"></div>
+  </section>
+
+  <section id="v-pick" hidden>
+    <button class="back" id="back-gender" type="button">← 性別を えらびなおす</button>
+    <h1 id="pick-title"></h1>
+    <p class="lead">ぜんぶ えらばなくても大丈夫です。<br>もう一度おすと、えらびなおせます。</p>
+    <div id="groups"></div>
+  </section>
+
+  <section id="v-results" hidden>
+    <button class="back" id="back-pick" type="button">← 条件を かえる</button>
+    <div class="card">
+      <div class="card-head"><span class="en">Result</span><span class="jp">さがした けっか</span></div>
+      <div class="count"><b id="count">12</b><span>けん</span></div>
+      <div class="sum" id="sum"></div>
+      <p class="query" id="query"></p>
+    </div>
+    <p class="notice">お試し版です。いまの画像は見本のイラストです。本番では、ネットにある写真が ならびます。</p>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<div class="bar" id="bar" hidden>
+  <div class="bar-in">
+    <div class="bar-text" id="bar-text"></div>
+    <button class="go" id="go" type="button">さがす</button>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="画像の拡大">
+    <div class="sheet-top"><span class="en" id="sheet-title"></span><button class="x" id="close" type="button" aria-label="とじる">✕</button></div>
+    <div id="sheet-img"></div>
+    <div class="sum" id="sheet-tags"></div>
+    <p class="src" id="sheet-src"></p>
+    <a class="visit" id="visit" target="_blank" rel="noopener noreferrer" href="#">元のサイトを見る ↗</a>
+    <p class="small">お試し版では、元のサイトのかわりに Google画像検索が ひらきます。</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var COMMON=[
+    ['ブラック','ブラック','#25222A'],['ダークブラウン','ダークブラウン','#4A3123'],['ブラウン','ブラウン','#7B5232'],
+    ['ライトブラウン','ライトブラウン','#A27B52'],['ベージュ','ベージュ','#C9A97A'],['ミルクティー','ミルクティーベージュ','#C7A58E'],
+    ['グレージュ','グレージュ','#A39A92'],['アッシュ','アッシュ','#9A9CA4'],['ハイトーン','ハイトーン ブリーチ','#E3C875'],
+    ['シルバー','シルバー ホワイト','#D6D6DD'],['カーキ','カーキ','#6D7254'],['ネイビー','ネイビー','#2D3A5C']
+  ];
+  var WOMEN_EXTRA=[['ピンク','ピンク','#E08CAB'],['ラベンダー','ラベンダー','#B49AD1'],['ボルドー','ボルドー','#7A2E45'],['オレンジ','オレンジ','#D9803A']];
+  var MEN_EXTRA=[['レッド','レッド','#9B3A33']];
+
+  var CONFIG={
+    men:{label:'男性',en:'Men',q:'メンズ',groups:[
+      {key:'length',en:'Length',title:'髪の長さ',opts:[['ベリーショート','ベリーショート','vshort'],['ショート','ショート','short'],['ミディアム','ミディアム','medium'],['セミロング','セミロング','semi'],['ロング','ロング','long']]},
+      {key:'side',en:'Side',title:'サイドの長さ',opts:[['スキンフェード','スキンフェード','short'],['ツーブロック','ツーブロック','short'],['短め（刈り上げ）','サイド短め 刈り上げ','short'],['ふつう','サイド普通','normal'],['長め','サイド長め','long']]},
+      {key:'bangs',en:'Front',title:'前髪・スタイル',opts:[['上げる','アップバング','none'],['下ろす','ダウンバング','blunt'],['流す','流し前髪','flow'],['センターパート','センターパート','center']]},
+      {key:'color',en:'Color',title:'髪の色',swatch:true,opts:COMMON.concat(MEN_EXTRA)},
+      {key:'perm',en:'Wave',title:'くせ・パーマ',opts:[['ストレート','ストレート','straight'],['ゆるパーマ','ゆるパーマ','perm'],['スパイラル','スパイラルパーマ','perm'],['ツイスト','ツイストパーマ','perm']]}
+    ]},
+    women:{label:'女性',en:'Women',q:'レディース',groups:[
+      {key:'length',en:'Length',title:'髪の長さ',opts:[['ベリーショート','ベリーショート','vshort'],['ショート','ショート','short'],['ボブ','ボブ','bob'],['ミディアム','ミディアム','medium'],['セミロング','セミロング','semi'],['ロング','ロング','long']]},
+      {key:'bangs',en:'Bangs',title:'前髪',opts:[['前髪あり','前髪あり','blunt'],['シースルー','シースルーバング','see'],['前髪なし','前髪なし','none'],['流し前髪','流し前髪','flow'],['センターパート','センターパート','center']]},
+      {key:'color',en:'Color',title:'髪の色',swatch:true,opts:COMMON.concat(WOMEN_EXTRA)},
+      {key:'perm',en:'Wave',title:'くせ・パーマ',opts:[['ストレート','ストレート','straight'],['ゆるふわ','ゆるふわパーマ','perm'],['巻き髪','巻き髪 コテ巻き','perm'],['外ハネ','外ハネ','flip'],['内巻き','内巻き','flip']]}
+    ]}
+  };
+  var SOURCES=['見本サロン A','見本サロン B','見本ブログ C','見本マガジン D','見本サロン E','見本ブログ F'];
+
+  var state={gender:null,sel:{},results:[],query:''};
+  var lastTile=null;
+  var $=function(id){return document.getElementById(id)};
+
+  function mix(hex,t){
+    var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255,to=t<0?0:255,k=Math.abs(t);
+    return '#'+[r,g,b].map(function(v){return Math.round(v+(to-v)*k).toString(16).padStart(2,'0')}).join('');
+  }
+
+  function hairSvg(o){
+    var s=o.seed,women=o.gender==='women';
+    var skin=['#F3D3BD','#EBC4A6','#F7DDCB','#E5BA98'][s%4];
+    var hair=mix(o.color,((s%3)-1)*0.1);
+    var bg='hsl('+[350,20,330,200,40,160,300,10][s%8]+' 28% 92%)';
+    var cloth=['#8A8F9E','#B58A96','#7E9A92','#9A8F86','#A9A3B8'][s%5];
+    var top,backB=0,sideY;
+    if(women){
+      top=42;backB={vshort:0,short:0,bob:150,medium:182,semi:198,long:216}[o.length];
+      sideY={vshort:100,short:112,bob:132,medium:132,semi:136,long:140}[o.length];
+    }else{
+      top=o.length==='vshort'?48:(o.length==='short'?46:40);
+      backB={vshort:0,short:0,medium:0,semi:150,long:178}[o.length];
+      sideY={short:86,normal:112,long:140}[o.side];
+    }
+    var x0=52,x1=148,y0=Math.min(sideY,92),inner;
+    if(o.bangs==='none')inner='Q100 34 '+(x0+8)+' '+y0;
+    else if(o.bangs==='blunt')inner='Q100 112 '+(x0+8)+' '+y0;
+    else if(o.bangs==='see')inner='Q100 100 '+(x0+8)+' '+y0;
+    else if(o.bangs==='center')inner='Q122 102 100 72Q78 102 '+(x0+8)+' '+y0;
+    else inner='C128 60 96 70 '+(x0+8)+' '+Math.min(108,sideY);
+    var p='';
+    p+='<rect width="200" height="240" fill="'+bg+'"/>';
+    p+='<path d="M20 240Q24 196 70 188L130 188Q176 196 180 240Z" fill="'+cloth+'"/>';
+    if(backB)p+='<path d="M46 96C40 36 160 36 154 96L156 '+backB+'Q100 '+(backB+16)+' 44 '+backB+'Z" fill="'+hair+'"/>';
+    p+='<rect x="86" y="150" width="28" height="46" rx="10" fill="'+mix(skin,-0.08)+'"/>';
+    p+='<ellipse cx="100" cy="112" rx="43" ry="52" fill="'+skin+'"/>';
+    p+='<ellipse cx="57" cy="116" rx="6" ry="10" fill="'+skin+'"/><ellipse cx="143" cy="116" rx="6" ry="10" fill="'+skin+'"/>';
+    p+='<circle cx="84" cy="118" r="3.2" fill="#3A2F2F"/><circle cx="116" cy="118" r="3.2" fill="#3A2F2F"/>';
+    p+='<path d="M90 143Q100 151 110 143" stroke="#B0675F" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    if(!women&&o.side==='short'){
+      p+='<rect x="54" y="84" width="8" height="26" rx="4" fill="'+hair+'" fill-opacity=".38"/><rect x="138" y="84" width="8" height="26" rx="4" fill="'+hair+'" fill-opacity=".38"/>';
+    }
+    p+='<path d="M'+x0+' '+sideY+'C'+(x0-8)+' '+(top+8)+' '+(x0+12)+' '+top+' 100 '+top+'C'+(x1-12)+' '+top+' '+(x1+8)+' '+(top+8)+' '+x1+' '+sideY+'L'+(x1-8)+' '+sideY+'L'+(x1-8)+' '+y0+inner+'L'+(x0+8)+' '+sideY+'Z" fill="'+hair+'"/>';
+    p+='<path d="M72 '+(top+16)+'Q100 '+(top+2)+' 130 '+(top+16)+'" stroke="#fff" stroke-opacity=".22" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    if(o.perm==='perm'||o.perm==='flip'){
+      p+='<g fill="'+hair+'">';
+      if(backB){p+='<circle cx="45" cy="'+backB+'" r="10"/><circle cx="155" cy="'+backB+'" r="10"/>';}
+      if(o.perm==='perm'){
+        if(backB)p+='<circle cx="52" cy="'+(backB-18)+'" r="8"/><circle cx="148" cy="'+(backB-18)+'" r="8"/>';
+        p+='<circle cx="68" cy="'+(top+4)+'" r="9"/><circle cx="100" cy="'+(top-2)+'" r="9"/><circle cx="132" cy="'+(top+4)+'" r="9"/>';
+      }
+      p+='</g>';
+    }
+    return '<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'+p+'</svg>';
+  }
+
+  function show(name){
+    ['gender','pick','results'].forEach(function(n){$('v-'+n).hidden=(n!==name)});
+    $('bar').hidden=(name!=='pick');
+    window.scrollTo(0,0);
+  }
+
+  function renderGender(){
+    var h='';
+    ['men','women'].forEach(function(g){
+      var svg=g==='men'
+        ?hairSvg({gender:'men',length:'short',side:'normal',bangs:'flow',color:'#4A3123',seed:1,perm:'straight'})
+        :hairSvg({gender:'women',length:'bob',bangs:'blunt',color:'#7B5232',seed:4,perm:'straight'});
+      h+='<button class="gcard" type="button" data-g="'+g+'">'+svg+'<span class="en">'+CONFIG[g].en+'</span><span class="jp">'+CONFIG[g].label+'</span></button>';
+    });
+    $('gender-cards').innerHTML=h;
+    $('gender-cards').onclick=function(e){
+      var b=e.target.closest('[data-g]');if(!b)return;
+      state.gender=b.getAttribute('data-g');state.sel={};renderPick();show('pick');
+    };
+  }
+
+  function selectedList(){
+    var cfg=CONFIG[state.gender],out=[];
+    cfg.groups.forEach(function(g){
+      var i=state.sel[g.key];if(i!==undefined)out.push({key:g.key,opt:g.opts[i]});
+    });
+    return out;
+  }
+
+  function updateBar(){
+    var n=selectedList().length;
+    $('bar-text').innerHTML='<b>'+CONFIG[state.gender].label+'</b>'+(n?' ＋ 条件 '+n+' こ':' ・ 条件は まだなし');
+  }
+
+  function renderPick(){
+    var cfg=CONFIG[state.gender];
+    $('pick-title').textContent=cfg.label+'の髪型を えらぶ';
+    var h='';
+    cfg.groups.forEach(function(g){
+      h+='<div class="card"><div class="card-head"><span class="en">'+g.en+'</span><span class="jp">'+g.title+'</span></div>';
+      h+=g.swatch?'<div class="swatches">':'<div class="chips">';
+      g.opts.forEach(function(o,i){
+        var on=state.sel[g.key]===i;
+        if(g.swatch){
+          h+='<button class="chip sw" type="button" aria-pressed="'+on+'" data-k="'+g.key+'" data-i="'+i+'"><span class="dot" style="background:'+o[2]+'"></span>'+o[0]+'</button>';
+        }else{
+          h+='<button class="chip" type="button" aria-pressed="'+on+'" data-k="'+g.key+'" data-i="'+i+'">'+o[0]+'</button>';
+        }
+      });
+      h+='</div></div>';
+    });
+    $('groups').innerHTML=h;
+    updateBar();
+  }
+
+  $('groups').addEventListener('click',function(e){
+    var b=e.target.closest('.chip');if(!b)return;
+    var k=b.getAttribute('data-k'),i=Number(b.getAttribute('data-i'));
+    if(state.sel[k]===i)delete state.sel[k];else state.sel[k]=i;
+    var sibs=b.parentNode.children;
+    for(var j=0;j<sibs.length;j++)sibs[j].setAttribute('aria-pressed',String(state.sel[k]===j));
+    updateBar();
+  });
+
+  function pickVal(arr,i,k){return arr[(i*(k+3)+k*5)%arr.length]}
+
+  function buildResults(){
+    var cfg=CONFIG[state.gender],sel=state.sel,women=state.gender==='women';
+    var grp=function(key){return cfg.groups.filter(function(x){return x.key===key})[0]};
+    var val=function(key){var g=grp(key);return sel[key]!==undefined?g.opts[sel[key]][2]:null};
+    var list=[];
+    for(var i=0;i<12;i++){
+      var o={
+        gender:state.gender,seed:i,
+        length:val('length')||(women?pickVal(['short','bob','medium','long','semi','vshort'],i,1):pickVal(['short','medium','short','semi','vshort','long'],i,1)),
+        color:val('color')||pickVal(grp('color').opts,i,2)[2],
+        perm:val('perm')||pickVal(['straight','straight','perm','flip'],i,3)
+      };
+      if(women){o.bangs=val('bangs')||pickVal(['blunt','none','flow','see','center'],i,4)}
+      else{
+        o.side=val('side')||pickVal(['normal','short','long','normal'],i,4);
+        o.bangs=val('bangs')||pickVal(['none','flow','center','blunt'],i,5);
+        if(o.perm==='flip')o.perm='straight';
+      }
+      list.push({o:o,src:SOURCES[i%SOURCES.length],n:('0'+(i+1)).slice(-2)});
+    }
+    return list;
+  }
+
+  function tagsHtml(){
+    return selectedList().map(function(x){return '<span class="tag">'+x.opt[0]+'</span>'}).join('')||'<span class="tag">条件なし（おまかせ）</span>';
+  }
+
+  function search(){
+    var cfg=CONFIG[state.gender];
+    var words=[cfg.q].concat(selectedList().map(function(x){return x.opt[1]})).concat(['髪型']);
+    state.query=words.join(' ');
+    $('sum').innerHTML='<span class="tag">'+cfg.label+'</span>'+tagsHtml();
+    $('query').textContent='検索ワード： '+state.query;
+    $('count').textContent='…';
+    var sk='';for(var i=0;i<6;i++)sk+='<div class="skel"></div>';
+    $('grid').innerHTML=sk;
+    show('results');
+    setTimeout(function(){
+      state.results=buildResults();
+      $('count').textContent=String(state.results.length);
+      $('grid').innerHTML=state.results.map(function(r,i){
+        return '<button class="tile" type="button" data-t="'+i+'" aria-label="見本 '+r.n+' を大きく見る">'+hairSvg(r.o)+'<small>見本 '+r.n+' ・ '+r.src+'</small></button>';
+      }).join('');
+    },550);
+  }
+
+  function openSheet(i,btn){
+    var r=state.results[i];if(!r)return;
+    lastTile=btn;
+    $('sheet-title').textContent='Sample '+r.n;
+    $('sheet-img').innerHTML=hairSvg(r.o);
+    $('sheet-tags').innerHTML='<span class="tag">'+CONFIG[state.gender].label+'</span>'+tagsHtml();
+    $('sheet-src').textContent='のっている場所： '+r.src;
+    $('visit').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(state.query);
+    $('backdrop').hidden=false;
+    document.body.style.overflow='hidden';
+    $('close').focus();
+  }
+  function closeSheet(){
+    $('backdrop').hidden=true;
+    document.body.style.overflow='';
+    if(lastTile)lastTile.focus();
+  }
+
+  $('grid').addEventListener('click',function(e){
+    var b=e.target.closest('.tile');if(!b)return;
+    openSheet(Number(b.getAttribute('data-t')),b);
+  });
+  $('close').addEventListener('click',closeSheet);
+  $('backdrop').addEventListener('click',function(e){if(e.target===$('backdrop'))closeSheet()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('backdrop').hidden)closeSheet()});
+  $('go').addEventListener('click',search);
+  $('back-gender').addEventListener('click',function(){show('gender')});
+  $('back-pick').addEventListener('click',function(){show('pick')});
+
+  renderGender();
+})();
+</script>
+
+</body>
+</html>
