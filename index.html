@@ -60,6 +60,12 @@
   --focus:#7FA2FF;--scrim:rgba(0,0,0,.65);
   color-scheme:dark;
 }
+/* men's screens: navy + charcoal instead of rose + mocha */
+:root[data-g="men"]{--bg:#F5F5F3;--tile:#F0F1F3;--ink:#2F3136;--muted:#757981;--line:#E1E3E7;--wine:#2F3B52;--rose:#7D8AA3;--rose-line:#C5CCD8;--rose-soft:#EEF1F5;--mocha-a:#4E5566;--mocha-b:#2B3040;--mocha-ink:#FFFFFF;--stripe:rgba(40,50,70,.03);}
+@media (prefers-color-scheme: dark){
+  :root[data-g="men"]:not([data-theme="light"]){--bg:#15171B;--surface:#1E2127;--tile:#272B32;--ink:#E7E9ED;--muted:#A3A8B1;--line:#33373F;--wine:#5B7099;--rose:#56627A;--rose-line:#3F4757;--rose-soft:#262C37;--mocha-a:#3A4150;--mocha-b:#22262F;--mocha-ink:#F2F4F8;--stripe:rgba(255,255,255,.02);}
+}
+:root[data-theme="dark"][data-g="men"]{--bg:#15171B;--surface:#1E2127;--tile:#272B32;--ink:#E7E9ED;--muted:#A3A8B1;--line:#33373F;--wine:#5B7099;--rose:#56627A;--rose-line:#3F4757;--rose-soft:#262C37;--mocha-a:#3A4150;--mocha-b:#22262F;--mocha-ink:#F2F4F8;--stripe:rgba(255,255,255,.02);}
 *{box-sizing:border-box}
 body{
   background:var(--bg) repeating-linear-gradient(135deg,var(--stripe) 0 2px,transparent 2px 7px);
@@ -228,6 +234,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
 @media (min-width:600px){.sheet{border-radius:6px}}
 .sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .sheet-title{display:flex;align-items:center;gap:6px;font-family:var(--font-en);font-weight:600;font-size:22px}
+#sheet-mark{display:flex}
 .x{min-height:44px;min-width:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:16px;line-height:1}
 .sheet .frame svg{max-height:50vh;margin:0 auto;width:auto;max-width:100%}
 .sheet-name{font-family:var(--font-mincho);font-size:19px;font-weight:700;margin:14px 0 0;line-height:1.5;text-align:center}
@@ -249,6 +256,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-flower" viewBox="0 0 20 20"><g fill="currentColor"><ellipse cx="10" cy="4.6" rx="3.2" ry="4.4"/><ellipse cx="10" cy="15.4" rx="3.2" ry="4.4"/><ellipse cx="4.6" cy="10" rx="4.4" ry="3.2"/><ellipse cx="15.4" cy="10" rx="4.4" ry="3.2"/></g><circle cx="10" cy="10" r="2.2" fill="var(--surface)"/></symbol>
+  <symbol id="i-diamond" viewBox="0 0 20 20"><path d="M10 1.5 18.5 10 10 18.5 1.5 10Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 6 14 10 10 14 6 10Z" fill="currentColor"/></symbol>
   <symbol id="i-orn" viewBox="0 0 260 14"><path d="M10 7H104M156 7H250" stroke="currentColor" stroke-width="1" fill="none"/><g fill="currentColor"><path d="M0 7l5-3.5 5 3.5-5 3.5z"/><path d="M250 7l5-3.5 5 3.5-5 3.5z"/><path d="M124 7l6-5 6 5-6 5z"/><path d="M106 7l5-3 5 3-5 3z"/><path d="M144 7l5-3 5 3-5 3z"/><circle cx="119" cy="7" r="1.5"/><circle cx="141" cy="7" r="1.5"/></g></symbol>
   <symbol id="i-leaf" viewBox="0 0 40 34"><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 30C16 28 26 20 32 6"/><path d="M14 27c-4-3-5-7-3-11"/><path d="M22 21c-1-5 1-9 5-11"/></g><g fill="currentColor"><path d="M32 6c3-3 6-3 8-2-2 3-5 4-8 2z"/><path d="M11 16c-3-1-5-4-4-7 3 1 5 4 4 7z"/><path d="M27 10c1-3 4-5 7-4-1 3-4 5-7 4z"/><path d="M20 24c3 0 6 2 6 5-3 0-6-2-6-5z"/></g></symbol>
 </svg>
@@ -321,7 +329,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
 
 <div class="backdrop" id="backdrop" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-    <div class="sheet-top"><span class="sheet-title"><svg class="flower" aria-hidden="true"><use href="#i-flower"/></svg><span id="sheet-title"></span></span><button class="x" id="close" type="button" aria-label="とじる">✕</button></div>
+    <div class="sheet-top"><span class="sheet-title"><span id="sheet-mark"></span><span id="sheet-title"></span></span><button class="x" id="close" type="button" aria-label="とじる">✕</button></div>
     <div class="frame" id="sheet-img"></div>
     <p class="sheet-name" id="sheet-name"></p>
     <dl class="spec" id="sheet-spec"></dl>
@@ -340,15 +348,26 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     ['シルバー','シルバー ホワイト','#D6D6DD'],['カーキ','カーキ','#6D7254'],['ネイビー','ネイビー','#2D3A5C']
   ];
   var WOMEN_EXTRA=[['ピンク','ピンク','#E08CAB'],['ラベンダー','ラベンダー','#B49AD1'],['ボルドー','ボルドー','#7A2E45'],['オレンジ','オレンジ','#D9803A']];
-  var MEN_EXTRA=[['レッド','レッド','#9B3A33']];
+  var MEN_COLORS=[
+    ['ブラック','ブラック','#1F1D22'],['ブルーブラック','ブルーブラック','#1E2433'],['ダークブラウン','ダークブラウン','#4A3123'],
+    ['ブラウン','ブラウン','#7B5232'],['アッシュ','アッシュ','#9A9CA4'],['アッシュグレー','アッシュグレー','#7F8389'],
+    ['グレージュ','グレージュ','#A39A92'],['カーキ','カーキ','#6D7254'],['ネイビー','ネイビー','#2D3A5C'],
+    ['ハイトーン','ハイトーン 金髪','#E3C875'],['シルバー','シルバー','#C9CBD1'],['ホワイト','ホワイト ブリーチ','#ECECEF'],['レッド','レッド','#9B3A33']
+  ];
+  // how each men's style is drawn in the sample illustration
+  var STYLE_DRAW={
+    mash:{bangs:'blunt'},center:{bangs:'center'},mohi:{bangs:'none',side:'short'},up:{bangs:'none'},
+    sichisan:{bangs:'flow'},back:{bangs:'none'},twob:{bangs:'blunt',side:'short'},fade:{bangs:'flow',side:'short'},
+    wolf:{bangs:'flow',side:'long'},crop:{bangs:'blunt',side:'short'},buzz:{bangs:'none',side:'short',length:'vshort'},korean:{bangs:'see'}
+  };
 
   var CONFIG={
     men:{label:'男性',en:'Men',sub:'メンズスタイル',q:'メンズ',groups:[
-      {key:'length',en:'Length',title:'髪の長さ',opts:[['ベリーショート','ベリーショート','vshort'],['ショート','ショート','short'],['ミディアム','ミディアム','medium'],['セミロング','セミロング','semi'],['ロング','ロング','long']]},
-      {key:'side',en:'Side',title:'サイドの長さ',opts:[['スキンフェード','スキンフェード','short'],['ツーブロック','ツーブロック','short'],['短め（刈り上げ）','サイド短め 刈り上げ','short'],['ふつう','サイド普通','normal'],['長め','サイド長め','long']]},
-      {key:'bangs',en:'Front',title:'前髪・スタイル',opts:[['上げる','アップバング','none'],['下ろす','ダウンバング','blunt'],['流す','流し前髪','flow'],['センターパート','センターパート','center']]},
-      {key:'color',en:'Color',title:'髪の色',swatch:true,opts:COMMON.concat(MEN_EXTRA)},
-      {key:'perm',en:'Wave',title:'くせ・パーマ',opts:[['ストレート','ストレート','straight'],['ゆるパーマ','ゆるパーマ','perm'],['スパイラル','スパイラルパーマ','perm'],['ツイスト','ツイストパーマ','perm']]}
+      {key:'style',en:'Style',title:'髪型',opts:[['マッシュ','マッシュ','mash'],['センターパート','センターパート','center'],['ソフトモヒカン','ソフトモヒカン','mohi'],['アップバング','アップバング','up'],['七三分け','七三分け','sichisan'],['オールバック','オールバック','back'],['ツーブロック','ツーブロック','twob'],['フェード','フェード','fade'],['ウルフ','ウルフ','wolf'],['クロップ','クロップ','crop'],['坊主','坊主 バズカット','buzz'],['韓国風','韓国風 マッシュ','korean']]},
+      {key:'length',en:'Length',title:'髪の長さ',auto:[1,2,1,0,1,2],opts:[['ベリーショート','ベリーショート','vshort'],['ショート','ショート','short'],['ミディアム','ミディアム','medium'],['ロング','ロング','long']]},
+      {key:'side',en:'Side',title:'サイド・えり足',opts:[['スキンフェード','スキンフェード','short'],['刈り上げ','刈り上げ','short'],['短め','サイド短め','short'],['ふつう','サイド普通','normal'],['長め','サイド長め','long']]},
+      {key:'color',en:'Color',title:'髪の色',swatch:true,opts:MEN_COLORS},
+      {key:'perm',en:'Perm',title:'パーマ',opts:[['なし（ストレート）','ストレート','straight'],['ニュアンス','ニュアンスパーマ','perm'],['波巻き','波巻きパーマ','perm'],['ツイスト','ツイストパーマ','perm'],['スパイラル','スパイラルパーマ','perm'],['ツイストスパイラル','ツイストスパイラル','perm'],['ダウンパーマ','ダウンパーマ','straight']]}
     ]},
     women:{label:'女性',en:'Women',sub:'レディーススタイル',q:'レディース',groups:[
       {key:'length',en:'Length',title:'髪の長さ',opts:[['ベリーショート','ベリーショート','vshort'],['ショート','ショート','short'],['ボブ','ボブ','bob'],['ミディアム','ミディアム','medium'],['セミロング','セミロング','semi'],['ロング','ロング','long']]},
@@ -358,7 +377,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     ]}
   };
   var SOURCES=['見本サロン A','見本サロン B','見本ブログ C','見本マガジン D','見本サロン E','見本ブログ F'];
-  var FLOWER='<svg class="flower" aria-hidden="true"><use href="#i-flower"/></svg>';
+  function mark(){return '<svg class="flower" aria-hidden="true"><use href="#'+(state.gender==='men'?'i-diamond':'i-flower')+'"/></svg>'}
 
   var state={gender:null,sel:{},results:[],query:''};
   var lastTile=null;
@@ -373,8 +392,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     var s=o.seed,women=o.gender==='women';
     var skin=['#F3D3BD','#EBC4A6','#F7DDCB','#E5BA98'][s%4];
     var hair=mix(o.color,((s%3)-1)*0.1);
-    var bg='hsl('+[350,20,330,10,40,345,300,25][s%8]+' 32% 93%)';
-    var cloth=['#8A8F9E','#B58A96','#7E9A92','#9A8F86','#A9A3B8'][s%5];
+    var bg=women?'hsl('+[350,20,330,10,40,345,300,25][s%8]+' 32% 93%)':'hsl('+[210,200,220,35,190,215,25,205][s%8]+' 14% 91%)';
+    var cloth=women?['#8A8F9E','#B58A96','#7E9A92','#9A8F86','#A9A3B8'][s%5]:['#3E4656','#5B6270','#2F3B52','#6B6F64','#4A4F5A'][s%5];
     var top,backB=0,sideY;
     if(women){
       top=42;backB={vshort:0,short:0,bob:150,medium:182,semi:198,long:216}[o.length];
@@ -425,6 +444,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
       tabs[i].disabled=(go==='pick'&&!state.gender)||(go==='results'&&!state.results.length);
     }
     $('bar').hidden=(name!=='pick');
+    if(name!=='gender'&&state.gender==='men')document.documentElement.setAttribute('data-g','men');
+    else document.documentElement.removeAttribute('data-g');
     window.scrollTo(0,0);
   }
 
@@ -462,7 +483,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     $('pick-title').textContent=cfg.label+'の髪型を えらぶ';
     var h='';
     cfg.groups.forEach(function(g){
-      h+='<div class="card"><div class="card-head">'+FLOWER+'<span class="en">'+g.en+'</span><span class="jp">'+g.title+'</span></div>';
+      h+='<div class="card"><div class="card-head">'+mark()+'<span class="en">'+g.en+'</span><span class="jp">'+g.title+'</span></div>';
       h+=g.swatch?'<div class="swatches">':'<div class="chips">';
       g.opts.forEach(function(o,i){
         var on=state.sel[g.key]===i;
@@ -494,11 +515,19 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     for(var i=0;i<12;i++){
       var o={gender:state.gender,seed:i},spec=[],words=[cfg.q];
       cfg.groups.forEach(function(g,k){
-        var opt=state.sel[g.key]!==undefined?g.opts[state.sel[g.key]]:pickVal(g.opts,i,k+1);
+        var pool=g.auto?g.auto.map(function(n){return g.opts[n]}):g.opts;
+        var opt=state.sel[g.key]!==undefined?g.opts[state.sel[g.key]]:pickVal(pool,i,k+1);
         o[g.key]=opt[2];spec.push({en:g.en,title:g.title,label:opt[0]});words.push(opt[1]);
       });
+      if(state.gender==='men'){
+        var d=STYLE_DRAW[o.style];
+        o.bangs=d.bangs;
+        if(d.side&&state.sel.side===undefined)o.side=d.side;
+        if(d.length&&state.sel.length===undefined)o.length=d.length;
+      }
       words.push('髪型');
-      var name=spec.filter(function(x){return x.en==='Length'||x.en==='Color'}).map(function(x){return x.label}).join(' ・ ');
+      var head=state.gender==='men'?'Style':'Length';
+      var name=spec.filter(function(x){return x.en===head||x.en==='Color'}).map(function(x){return x.label}).join(' ・ ');
       list.push({o:o,spec:spec,name:name,query:words.join(' '),src:SOURCES[i%SOURCES.length],n:('0'+(i+1)).slice(-2)});
     }
     return list;
@@ -530,6 +559,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
   function openSheet(i,btn){
     var r=state.results[i];if(!r)return;
     lastTile=btn;
+    $('sheet-mark').innerHTML=mark();
     $('sheet-title').textContent='Style '+r.n;
     $('sheet-img').innerHTML=hairSvg(r.o);
     $('sheet-name').textContent=CONFIG[state.gender].label+'　'+r.name;
