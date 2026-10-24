@@ -6,7 +6,7 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>ヘアスタイル検索</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@400;500&family=Noto+Serif+JP:wght@500;600&display=swap">
 <style>
 /* Layout: soft pink brand band on top, then one phone-first column of white rounded cards on light grey (gender tiles, option cards with EN label + divider, results grid, zoom sheet). */
 :root{
@@ -22,6 +22,9 @@
   --accent:#C77488;
   --accent-soft:#F9E6EA;
   --accent-ink:#FFFFFF;
+  --gold:#B08D57;--gold-ink:#94703A;--gold-soft:#EADFC8;--club-a:#4A5068;--club-b:#262A38;--heart-a:#DB7B91;--heart-b:#B34560;
+  --shadow:0 1px 2px rgba(120,86,60,.06),0 10px 26px rgba(120,80,90,.07);
+  --font-serif:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;
   --focus:#2A5BD7;
   --scrim:rgba(40,30,34,.55);
   --font-brand:"Playfair Display","Hiragino Mincho ProN","Noto Serif JP",serif;
@@ -30,14 +33,14 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#16161A;--surface:#212126;--tile:#2A2A31;--ink:#E9E6E8;--muted:#A6A3AA;--line:#34343C;
-    --band:#3A2A30;--brand:#E2A2B3;--en:#E39AAB;--accent:#E58AA0;--accent-soft:#4A2E37;--accent-ink:#2A1017;
+    --band:#3A2A30;--brand:#E2A2B3;--en:#E39AAB;--accent:#E58AA0;--accent-soft:#4A2E37;--accent-ink:#2A1017;--gold:#D6B67E;--gold-ink:#D6B67E;--gold-soft:#4A3F2C;--club-a:#7C839E;--club-b:#4C5268;--heart-a:#EE8FA4;--heart-b:#CB5973;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 26px rgba(0,0,0,.25);
     --focus:#7FA2FF;--scrim:rgba(0,0,0,.65);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#16161A;--surface:#212126;--tile:#2A2A31;--ink:#E9E6E8;--muted:#A6A3AA;--line:#34343C;
-  --band:#3A2A30;--brand:#E2A2B3;--en:#E39AAB;--accent:#E58AA0;--accent-soft:#4A2E37;--accent-ink:#2A1017;
+  --band:#3A2A30;--brand:#E2A2B3;--en:#E39AAB;--accent:#E58AA0;--accent-soft:#4A2E37;--accent-ink:#2A1017;--gold:#D6B67E;--gold-ink:#D6B67E;--gold-soft:#4A3F2C;--club-a:#7C839E;--club-b:#4C5268;--heart-a:#EE8FA4;--heart-b:#CB5973;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 26px rgba(0,0,0,.25);
   --focus:#7FA2FF;--scrim:rgba(0,0,0,.65);
   color-scheme:dark;
 }
@@ -47,7 +50,7 @@ button{font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
 .band{
-  background:var(--band);text-align:center;padding-block:18px 16px;
+  background:var(--band);border-bottom:1px solid var(--gold);text-align:center;padding-block:18px 16px;
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
 }
@@ -59,21 +62,21 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
   padding-right:max(16px,env(safe-area-inset-right,0px));
 }
 h1,h2{margin:0;line-height:1.5;text-wrap:balance}
-h1{font-size:20px;font-weight:700;text-align:center}
+h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.08em;text-align:center}
 .lead{margin:6px 0 22px;color:var(--muted);text-align:center;font-size:14px}
 .back{background:none;border:0;padding:6px 0;margin:0 0 6px;color:var(--muted);font-size:14px;min-height:44px}
 .back:hover{color:var(--ink)}
 
 /* cards */
-.card{background:var(--surface);border-radius:18px;padding:6px 16px 18px;margin:0 0 14px}
-.card-head{display:flex;justify-content:center;align-items:baseline;gap:14px;padding:14px 0 12px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.en{font-weight:700;font-size:13px;letter-spacing:.2em;color:var(--en);text-transform:uppercase}
+.card{background:var(--surface);border:1px solid var(--gold-soft);box-shadow:var(--shadow);border-radius:18px;padding:6px 16px 18px;margin:0 0 14px}
+.card-head{display:flex;justify-content:center;align-items:baseline;gap:14px;padding:14px 0 12px;border-width:0 0 1px;border-style:solid;border-image:linear-gradient(90deg,transparent,var(--gold),transparent) 1;margin-bottom:16px}
+.en{font-weight:700;font-size:13px;letter-spacing:.2em;color:var(--gold-ink);text-transform:uppercase}
 .jp{font-weight:700;font-size:16px;color:var(--ink)}
 
 /* step 1 */
 .genders{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .gcard{
-  background:var(--surface);border:0;border-radius:18px;padding:26px 12px 22px;
+  background:var(--surface);border:1px solid var(--gold-soft);box-shadow:var(--shadow);border-radius:18px;padding:26px 12px 22px;
   display:flex;flex-direction:column;gap:4px;align-items:center;min-width:0;
 }
 .gcard:hover{background:var(--accent-soft)}
@@ -87,14 +90,14 @@ h1{font-size:20px;font-weight:700;text-align:center}
   min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);
   display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;
 }
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--gold);color:var(--accent-ink);font-weight:700}
 .swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 @media (min-width:480px){.swatches{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .sw{
   flex-direction:column;justify-content:center;gap:8px;border-radius:14px;border:1.5px solid transparent;background:var(--tile);
   padding:12px 6px;min-height:84px;font-size:12px;text-align:center;line-height:1.4;
 }
-.sw[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:700}
+.sw[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--gold);color:var(--ink);font-weight:700}
 .dot{width:34px;height:34px;border-radius:50%;border:1px solid rgba(128,128,128,.45);flex:none}
 
 .bar{
@@ -107,13 +110,13 @@ h1{font-size:20px;font-weight:700;text-align:center}
 .bar-text{font-size:13px;color:var(--muted);min-width:0;line-height:1.5}
 .bar-text b{color:var(--ink);font-weight:700}
 .go{
-  min-height:48px;padding:0 30px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);
+  min-height:48px;padding:0 30px;border-radius:999px;border:1px solid var(--gold);background:var(--accent);color:var(--accent-ink);
   font-weight:700;font-size:17px;letter-spacing:.2em;flex:none;
 }
 
 /* results */
 .count{text-align:center;padding:4px 0 2px}
-.count b{font-size:44px;font-weight:400;color:var(--muted);letter-spacing:0;line-height:1.2}
+.count b{font-family:var(--font-serif);font-size:44px;font-weight:500;color:var(--muted);letter-spacing:0;line-height:1.2}
 .count span{font-size:17px;color:var(--muted);margin-left:6px}
 .sum{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 0}
 .tag{background:var(--tile);border-radius:999px;padding:2px 12px;font-size:13px}
@@ -121,7 +124,7 @@ h1{font-size:20px;font-weight:700;text-align:center}
 .notice{background:var(--accent-soft);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--ink);margin:0 0 14px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media (min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.tile{padding:0;border:0;background:var(--surface);border-radius:16px;overflow:hidden;text-align:left;display:block;min-width:0}
+.tile{padding:0;border:1px solid var(--gold-soft);box-shadow:var(--shadow);background:var(--surface);border-radius:16px;overflow:hidden;text-align:left;display:block;min-width:0}
 .tile:hover{background:var(--accent-soft)}
 .tile svg{display:block;width:100%;height:auto}
 .tile small{display:block;padding:6px 12px 10px;font-size:12px;color:var(--muted)}
@@ -292,8 +295,8 @@ h1{font-size:20px;font-weight:700;text-align:center}
   function renderGender(){
     var h='';
     var ICONS={
-      men:'<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><g transform="translate(30 30) scale(1.2) translate(-30 -30)"><path fill="currentColor" fill-opacity=".14" transform="translate(30 30) rotate(45) translate(0 -2.600)" d="M0 0C-2-3-9-7-9-12.500C-9-16-6.500-18-4-18C-2-18-.8-17 0-15.500C.8-17 2-18 4-18C6.500-18 9-16 9-12.500C9-7 2-3 0 0Z"/><path fill="currentColor" fill-opacity=".14" transform="translate(30 30) rotate(135) translate(0 -2.600)" d="M0 0C-2-3-9-7-9-12.500C-9-16-6.500-18-4-18C-2-18-.8-17 0-15.500C.8-17 2-18 4-18C6.500-18 9-16 9-12.500C9-7 2-3 0 0Z"/><path fill="currentColor" fill-opacity=".14" transform="translate(30 30) rotate(225) translate(0 -2.600)" d="M0 0C-2-3-9-7-9-12.500C-9-16-6.500-18-4-18C-2-18-.8-17 0-15.500C.8-17 2-18 4-18C6.500-18 9-16 9-12.500C9-7 2-3 0 0Z"/><path fill="currentColor" fill-opacity=".14" transform="translate(30 30) rotate(315) translate(0 -2.600)" d="M0 0C-2-3-9-7-9-12.500C-9-16-6.500-18-4-18C-2-18-.8-17 0-15.500C.8-17 2-18 4-18C6.500-18 9-16 9-12.500C9-7 2-3 0 0Z"/><path d="M30 30C29 38 31 44 35 49"/></g></svg>',
-      women:'<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path transform="translate(30 31) scale(.92) translate(-30 -31)" fill="currentColor" fill-opacity=".14" d="M30 52C30 52 8 38.500 8 23C8 15.500 13.500 10 20.500 10C24.800 10 28.300 12.300 30 16C31.700 12.300 35.200 10 39.500 10C46.500 10 52 15.500 52 23C52 38.500 30 52 30 52Z"/></svg>'
+      men:'<svg viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="cG" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="52" y2="54"><stop offset="0" stop-color="#F0E0B0"/><stop offset=".5" stop-color="#B58F55"/><stop offset="1" stop-color="#E6D19C"/></linearGradient><linearGradient id="cF" gradientUnits="userSpaceOnUse" x1="30" y1="8" x2="30" y2="54"><stop offset="0" style="stop-color:var(--club-a)"/><stop offset="1" style="stop-color:var(--club-b)"/></linearGradient><g id="clubShape"><circle cx="30" cy="19" r="10.5"/><circle cx="18.5" cy="37.5" r="10.5"/><circle cx="41.5" cy="37.5" r="10.5"/><circle cx="30" cy="31" r="8"/><path d="M30 34C30 45 27 50 21.500 53.500L38.500 53.500C33 50 30 45 30 34Z"/></g></defs><use href="#clubShape" fill="url(#cG)" stroke="url(#cG)" stroke-width="2.2" stroke-linejoin="round"/><use href="#clubShape" fill="url(#cF)" stroke="none"/></svg>',
+      women:'<svg viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="hG" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="52" y2="54"><stop offset="0" stop-color="#F0E0B0"/><stop offset=".5" stop-color="#B58F55"/><stop offset="1" stop-color="#E6D19C"/></linearGradient><linearGradient id="hF" gradientUnits="userSpaceOnUse" x1="30" y1="8" x2="30" y2="54"><stop offset="0" style="stop-color:var(--heart-a)"/><stop offset="1" style="stop-color:var(--heart-b)"/></linearGradient></defs><path transform="translate(30 31) scale(.94) translate(-30 -31)" d="M30 52C30 52 8 38.500 8 23C8 15.500 13.500 10 20.500 10C24.800 10 28.300 12.300 30 16C31.700 12.300 35.200 10 39.500 10C46.500 10 52 15.500 52 23C52 38.500 30 52 30 52Z" fill="url(#hF)" stroke="url(#hG)" stroke-width="1.5" stroke-linejoin="round"/></svg>'
     };
     ['men','women'].forEach(function(g){
       h+='<button class="gcard" type="button" data-g="'+g+'"><span class="ico">'+ICONS[g]+'</span><span class="en">'+CONFIG[g].en+'</span><span class="jp">'+CONFIG[g].label+'</span></button>';
