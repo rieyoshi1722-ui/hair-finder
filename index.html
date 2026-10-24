@@ -219,6 +219,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
 .tile{padding:0;border:0;background:none;text-align:left;display:flex;flex-direction:column;min-width:0}
 .frame{display:block;padding:5px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
 .frame svg{display:block;width:100%;height:auto}
+.frame img{display:block;width:100%;aspect-ratio:5/6;max-width:100%;object-fit:cover;background:var(--tile)}
+.left{font-size:12px;color:var(--muted);text-align:center;margin:-8px 0 14px}
 .tile:hover .frame{border-color:var(--gold)}
 .skel{aspect-ratio:5/6;max-width:100%;background:var(--line);animation:pulse 1s ease-in-out infinite alternate}
 @keyframes pulse{from{opacity:.5}to{opacity:1}}
@@ -237,6 +239,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
 #sheet-mark{display:flex}
 .x{min-height:44px;min-width:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:16px;line-height:1}
 .sheet .frame svg{max-height:50vh;margin:0 auto;width:auto;max-width:100%}
+.sheet .frame img{aspect-ratio:auto;max-height:60vh;object-fit:contain}
+.sheet-name.photo{font-family:var(--font-body);font-size:14px;font-weight:500;text-align:left}
 .sheet-name{font-family:var(--font-mincho);font-size:19px;font-weight:700;margin:14px 0 0;line-height:1.5;text-align:center}
 .spec{margin:14px 4px 0;border:1px solid var(--gold-soft);outline:1px solid var(--gold-soft);outline-offset:3px;padding:4px 12px}
 .spec div{display:grid;grid-template-columns:8em 1fr;gap:10px;padding:8px 0;align-items:baseline}
@@ -315,7 +319,8 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     <div class="banner"><svg class="leaf" aria-hidden="true"><use href="#i-leaf"/></svg><div class="banner-t"><small>さがした けっか</small><div class="count-row"><b id="count">12</b><span>STYLES</span></div></div><svg class="leaf r" aria-hidden="true"><use href="#i-leaf"/></svg></div>
     <div class="sum" id="sum"></div>
     <p class="query" id="query"></p>
-    <p class="notice">お試し版です。いまの画像は見本のイラストです。本番では、ネットにある写真が ならびます。</p>
+    <p class="left" id="left" hidden></p>
+    <p class="notice" id="res-notice" hidden></p>
     <div class="grid" id="grid"></div>
   </div>
 </section>
@@ -335,7 +340,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     <dl class="spec" id="sheet-spec"></dl>
     <p class="src" id="sheet-src"></p>
     <a class="visit" id="visit" target="_blank" rel="noopener noreferrer" href="#">元のサイトを見る ↗</a>
-    <p class="small">お試し版では、元のサイトのかわりに Google画像検索が ひらきます。</p>
+    <p class="small" id="sheet-note"></p>
   </div>
 </div>
 
@@ -537,35 +542,103 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offs
     return selectedList().map(function(x){return '<span class="tag">'+x.opt[0]+'</span>'}).join('')||'<span class="tag">条件なし（おまかせ）</span>';
   }
 
+  var API='https://hair-finder-api.rie-yoshi1722.workers.dev/';
+  var searchNo=0;
+  function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+  // ask the relay for photos; resolves null when it can't be reached in time
+  function fetchPhotos(q){
+    return new Promise(function(resolve){
+      var ctl=window.AbortController?new AbortController():null;
+      var timer=setTimeout(function(){if(ctl)ctl.abort();resolve(null)},9000);
+      fetch(API+'?q='+encodeURIComponent(q),ctl?{signal:ctl.signal}:{})
+        .then(function(r){return r.json()})
+        .then(function(d){clearTimeout(timer);resolve(d)})
+        .catch(function(){clearTimeout(timer);resolve(null)});
+    });
+  }
+
+  function setNotice(text){$('res-notice').textContent=text||'';$('res-notice').hidden=!text}
+
+  function showPhotos(d){
+    state.results=d.images.map(function(x,i){return {photo:x,n:('0'+(i+1)).slice(-2)}});
+    $('grid').innerHTML=state.results.map(function(r,i){
+      return '<button class="tile" type="button" data-t="'+i+'" aria-label="写真 '+r.n+' を大きく見る"><span class="frame"><img src="'+esc(r.photo.thumb)+'" alt="" loading="lazy" referrerpolicy="no-referrer"></span></button>';
+    }).join('');
+    $('left').textContent='無料の残り 約'+d.left+'回'+(d.cached?'（前にさがした結果なので、回数は減っていません）':'');
+    $('left').hidden=false;
+    setNotice(d.left<=300?'無料の残りが少なくなってきました（約'+d.left+'回）。そろそろBraveへの切りかえを準備しましょう。':'');
+  }
+
+  function showSamples(d){
+    state.results=buildResults();
+    $('grid').innerHTML=state.results.map(function(r,i){
+      return '<button class="tile" type="button" data-t="'+i+'" aria-label="見本 '+r.n+' '+r.name+' を大きく見る"><span class="frame">'+hairSvg(r.o)+'</span></button>';
+    }).join('');
+    $('left').hidden=true;
+    var why='いまネットの写真を読みこめないため、見本のイラストを出しています。';
+    if(d&&d.reason==='exhausted')why='無料の回数がなくなりました。写真のかわりに見本のイラストを出しています。';
+    else if(d&&d.reason==='daily')why='今日さがせる回数の上限になりました。明日また写真が出ます。';
+    else if(d&&d.ok)why='この条件では写真が見つかりませんでした。条件をへらしてみてください。';
+    setNotice(why+'イラストを押すと、Google画像検索がひらきます。');
+  }
+
   function search(){
-    var cfg=CONFIG[state.gender];
+    var cfg=CONFIG[state.gender],no=++searchNo;
     var words=[cfg.q].concat(selectedList().map(function(x){return x.opt[1]})).concat(['髪型']);
     state.query=words.join(' ');
     $('sum').innerHTML='<span class="tag">'+cfg.label+'</span>'+tagsHtml();
     $('query').textContent='検索ワード： '+state.query;
     $('count').textContent='…';
+    $('left').hidden=true;setNotice('');
     var sk='';for(var i=0;i<6;i++)sk+='<div class="skel"></div>';
     $('grid').innerHTML=sk;
-    state.results=buildResults();
+    state.results=[{}];
     show('results');
-    setTimeout(function(){
+    fetchPhotos(state.query).then(function(d){
+      if(no!==searchNo)return;
+      if(d&&d.ok&&d.images&&d.images.length)showPhotos(d);else showSamples(d);
       $('count').textContent=String(state.results.length);
-      $('grid').innerHTML=state.results.map(function(r,i){
-        return '<button class="tile" type="button" data-t="'+i+'" aria-label="スタイル '+r.n+' '+r.name+' を大きく見る"><span class="frame">'+hairSvg(r.o)+'</span></button>';
-      }).join('');
-    },550);
+    });
+  }
+
+  function conditionRows(){
+    var rows=[{en:'Gender',title:'性別',label:CONFIG[state.gender].label}];
+    var cfg=CONFIG[state.gender];
+    selectedList().forEach(function(x){
+      var g=cfg.groups.filter(function(y){return y.key===x.key})[0];
+      rows.push({en:g.en,title:g.title,label:x.opt[0]});
+    });
+    return rows;
   }
 
   function openSheet(i,btn){
-    var r=state.results[i];if(!r)return;
+    var r=state.results[i];if(!r||(!r.photo&&!r.o))return;
     lastTile=btn;
     $('sheet-mark').innerHTML=mark();
-    $('sheet-title').textContent='Style '+r.n;
-    $('sheet-img').innerHTML=hairSvg(r.o);
-    $('sheet-name').textContent=CONFIG[state.gender].label+'　'+r.name;
-    $('sheet-spec').innerHTML=r.spec.map(function(x){return '<div><dt><b>'+x.en+'</b>'+x.title+'</dt><dd>'+x.label+'</dd></div>'}).join('');
-    $('sheet-src').textContent='のっている場所： '+r.src;
-    $('visit').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(r.query);
+    $('sheet-title').textContent=(r.photo?'Photo ':'Style ')+r.n;
+    var rows;
+    if(r.photo){
+      var p=r.photo;
+      $('sheet-img').innerHTML='<img src="'+esc(p.full||p.thumb)+'" alt="" referrerpolicy="no-referrer">';
+      var im=$('sheet-img').querySelector('img');
+      im.onerror=function(){if(im.src!==p.thumb){im.onerror=null;im.src=p.thumb}};
+      $('sheet-name').textContent=p.title||'';
+      $('sheet-name').className='sheet-name photo';
+      rows=conditionRows();
+      $('sheet-src').textContent='のっている場所： '+(p.site||'');
+      $('visit').href=p.page;
+      $('sheet-note').textContent='写真は元のサイトのものです。くわしくは元のサイトで見てください。';
+    }else{
+      $('sheet-img').innerHTML=hairSvg(r.o);
+      $('sheet-name').textContent=CONFIG[state.gender].label+'　'+r.name;
+      $('sheet-name').className='sheet-name';
+      rows=r.spec;
+      $('sheet-src').textContent='見本のイラストです';
+      $('visit').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(r.query);
+      $('sheet-note').textContent='ボタンを押すと、この条件で Google画像検索がひらきます。';
+    }
+    $('sheet-spec').innerHTML=rows.map(function(x){return '<div><dt><b>'+x.en+'</b>'+x.title+'</dt><dd>'+x.label+'</dd></div>'}).join('');
     $('backdrop').hidden=false;
     document.body.style.overflow='hidden';
     $('close').focus();
