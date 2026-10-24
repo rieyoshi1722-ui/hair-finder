@@ -296,8 +296,8 @@ h1{font-size:20px;font-weight:700;text-align:center}
   function renderGender(){
     var h='';
     var ICONS={
-      men:'<svg viewBox="0 0 56 60" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="28" cy="23" r="10"/><path d="M18 21C17 8 39 8 38 21"/><path d="M7 58C7 42 16 38 28 38S49 42 49 58"/></svg>',
-      women:'<svg viewBox="0 0 56 60" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="28" cy="23" r="10"/><path d="M17 25C12 8 44 8 39 25"/><path d="M17 25C16 34 14 38 11 43M39 25C40 34 42 38 45 43"/><path d="M7 58C7 44 16 40 28 40S49 44 49 58"/></svg>'
+      men:'<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path transform="translate(30 30) rotate(45)" d="M0 0C-3-5-11-9-11-15C-11-19.500-8-22-4.500-22C-2.200-22-.8-21 0-19C.8-21 2.200-22 4.500-22C8-22 11-19.500 11-15C11-9 3-5 0 0Z"/><path transform="translate(30 30) rotate(135)" d="M0 0C-3-5-11-9-11-15C-11-19.500-8-22-4.500-22C-2.200-22-.8-21 0-19C.8-21 2.200-22 4.500-22C8-22 11-19.500 11-15C11-9 3-5 0 0Z"/><path transform="translate(30 30) rotate(225)" d="M0 0C-3-5-11-9-11-15C-11-19.500-8-22-4.500-22C-2.200-22-.8-21 0-19C.8-21 2.200-22 4.500-22C8-22 11-19.500 11-15C11-9 3-5 0 0Z"/><path transform="translate(30 30) rotate(315)" d="M0 0C-3-5-11-9-11-15C-11-19.500-8-22-4.500-22C-2.200-22-.8-21 0-19C.8-21 2.200-22 4.500-22C8-22 11-19.500 11-15C11-9 3-5 0 0Z"/></svg>',
+      women:'<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 53C30 53 7 39 7 23C7 15 13 9 20.500 9C25 9 28.500 11.500 30 15C31.500 11.500 35 9 39.500 9C47 9 53 15 53 23C53 39 30 53 30 53Z"/></svg>'
     };
     ['men','women'].forEach(function(g){
       h+='<button class="gcard" type="button" data-g="'+g+'"><span class="ico">'+ICONS[g]+'</span><span class="en">'+CONFIG[g].en+'</span><span class="jp">'+CONFIG[g].label+'</span></button>';
