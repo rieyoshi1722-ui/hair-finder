@@ -8,7 +8,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@400;500&family=Noto+Serif+JP:wght@500;600&display=swap">
 <style>
-/* Layout: soft pink brand band on top, then one phone-first column of white rounded cards on light grey (gender tiles, option cards with EN label + divider, results grid, zoom sheet). */
+/* Layout: salon-app shell. Sticky pink header with salon name + gold rule, a 3-step progress row, then one phone-first column: catalog cover, option cards (EN label + divider), style-book grid, style detail sheet. */
 :root{
   --bg:#F5F5F6;
   --surface:#FFFFFF;
@@ -45,16 +45,39 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.7;letter-spacing:.04em}
+body{font-variant-numeric:lining-nums;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.7;letter-spacing:.04em}
 button{font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
 .band{
-  background:var(--band);border-bottom:1px solid var(--gold);text-align:center;padding-block:18px 16px;
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:8;
+  background:var(--band);border-bottom:1px solid var(--gold);text-align:center;padding-block:12px 11px;
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
 }
-.brand{font-family:var(--font-brand);font-weight:400;font-size:19px;letter-spacing:.42em;color:var(--brand);margin:0;padding-left:.42em}
+.salon{margin:0;font-family:var(--font-brand);font-style:italic;font-size:12px;letter-spacing:.14em;color:var(--gold-ink);line-height:1.4}
+.brand{font-family:var(--font-brand);font-weight:400;font-size:18px;letter-spacing:.42em;color:var(--brand);margin:0;padding-left:.42em;line-height:1.5}
+
+/* steps */
+.steps{list-style:none;display:flex;justify-content:center;align-items:center;gap:0;margin:0 0 20px;padding:0;font-size:12px;color:var(--muted)}
+.steps li{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.steps li+li::before{content:"";width:22px;height:1px;background:var(--gold-soft);margin:0 8px}
+.steps .n{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold-soft);display:grid;place-items:center;font-family:var(--font-brand);font-size:12px;line-height:1;color:var(--gold-ink);background:var(--surface)}
+.steps .on{color:var(--ink);font-weight:700}
+.steps .on .n{background:var(--accent);border-color:var(--gold);color:var(--accent-ink)}
+.steps .done .n{background:var(--gold-soft);border-color:var(--gold-soft)}
+
+/* catalog cover */
+.cover{
+  position:relative;overflow:hidden;text-align:center;border-radius:22px;border:1px solid var(--gold-soft);box-shadow:var(--shadow);
+  background:linear-gradient(160deg,var(--band) 0%,var(--surface) 78%);padding:28px 18px 26px;margin:0 0 18px;
+}
+.cover::after{content:"";position:absolute;inset:8px;border:1px solid var(--gold-soft);border-radius:16px;pointer-events:none}
+.eyebrow{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 10px;font-family:var(--font-brand);font-style:italic;font-size:15px;letter-spacing:.12em;color:var(--gold-ink)}
+.eyebrow::before,.eyebrow::after{content:"";width:28px;height:1px;background:var(--gold)}
+.cover .lead{margin:10px 0 0}
+.scissors{display:block;width:30px;height:30px;margin:14px auto 0;color:var(--gold)}
 
 .wrap{
   max-width:720px;margin:0 auto;padding-block:22px 128px;
@@ -74,15 +97,18 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
 .jp{font-weight:700;font-size:16px;color:var(--ink)}
 
 /* step 1 */
+.sec-title{display:flex;align-items:baseline;justify-content:center;gap:12px;margin:4px 0 12px}
 .genders{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .gcard{
-  background:var(--surface);border:1px solid var(--gold-soft);box-shadow:var(--shadow);border-radius:18px;padding:26px 12px 22px;
-  display:flex;flex-direction:column;gap:4px;align-items:center;min-width:0;
+  background:var(--surface);border:1px solid var(--gold-soft);box-shadow:var(--shadow);border-radius:18px;padding:24px 12px 18px;
+  display:flex;flex-direction:column;gap:2px;align-items:center;min-width:0;
 }
 .gcard:hover{background:var(--accent-soft)}
-.gcard .ico{color:var(--accent);display:grid;place-items:center;margin-bottom:10px}
-.gcard .ico svg{width:84px;height:84px;display:block}
-.gcard .jp{font-size:18px}
+.gcard .ico{color:var(--accent);display:grid;place-items:center;margin-bottom:12px}
+.gcard .ico svg{width:76px;height:76px;display:block}
+.gcard .jp{font-family:var(--font-serif);font-size:19px;font-weight:600}
+.gcard .sub{font-size:12px;color:var(--muted)}
+.gcard .arrow{margin-top:12px;font-size:12px;letter-spacing:.16em;color:var(--gold-ink);border-top:1px solid var(--gold-soft);padding-top:8px;width:70%}
 
 /* chips + swatches */
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
@@ -110,24 +136,27 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
 .bar-text{font-size:13px;color:var(--muted);min-width:0;line-height:1.5}
 .bar-text b{color:var(--ink);font-weight:700}
 .go{
-  min-height:48px;padding:0 30px;border-radius:999px;border:1px solid var(--gold);background:var(--accent);color:var(--accent-ink);
+  min-height:48px;padding:0 26px;border-radius:999px;border:1px solid var(--gold);background:var(--accent);color:var(--accent-ink);
   font-weight:700;font-size:17px;letter-spacing:.2em;flex:none;
 }
 
 /* results */
 .count{text-align:center;padding:4px 0 2px}
-.count b{font-family:var(--font-serif);font-size:44px;font-weight:500;color:var(--muted);letter-spacing:0;line-height:1.2}
-.count span{font-size:17px;color:var(--muted);margin-left:6px}
+.count b{font-family:var(--font-brand);font-size:46px;font-weight:400;color:var(--brand);letter-spacing:0;line-height:1.2}
+.count span{font-family:var(--font-brand);font-size:14px;letter-spacing:.24em;color:var(--gold-ink);margin-left:8px}
 .sum{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 0}
 .tag{background:var(--tile);border-radius:999px;padding:2px 12px;font-size:13px}
 .query{font-size:13px;color:var(--muted);margin:12px 0 0;text-align:center;overflow-wrap:anywhere}
 .notice{background:var(--accent-soft);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--ink);margin:0 0 14px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.tile{padding:0;border:1px solid var(--gold-soft);box-shadow:var(--shadow);background:var(--surface);border-radius:16px;overflow:hidden;text-align:left;display:block;min-width:0}
+.tile{padding:0;border:1px solid var(--gold-soft);box-shadow:var(--shadow);background:var(--surface);border-radius:16px;overflow:hidden;text-align:left;display:flex;flex-direction:column;min-width:0}
 .tile:hover{background:var(--accent-soft)}
 .tile svg{display:block;width:100%;height:auto}
-.tile small{display:block;padding:6px 12px 10px;font-size:12px;color:var(--muted)}
+.cap{display:flex;flex-direction:column;gap:1px;padding:9px 12px 12px;min-width:0}
+.no{font-family:var(--font-brand);font-size:13px;letter-spacing:.16em;color:var(--gold-ink)}
+.nm{font-size:13px;font-weight:700;line-height:1.5;overflow-wrap:anywhere}
+.from{font-size:11px;color:var(--muted)}
 .skel{aspect-ratio:5/6;max-width:100%;border-radius:16px;background:var(--line);animation:pulse 1s ease-in-out infinite alternate}
 @keyframes pulse{from{opacity:.5}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
@@ -143,10 +172,15 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
 .sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .x{min-height:44px;min-width:44px;border-radius:50%;border:0;background:var(--tile);font-size:18px;line-height:1}
 .sheet svg{display:block;width:100%;height:auto;max-height:52vh;border-radius:14px}
-.sheet .sum{justify-content:flex-start;margin-top:12px}
+.sheet-name{font-family:var(--font-serif);font-size:18px;font-weight:600;margin:14px 0 4px;line-height:1.5}
+.spec{margin:10px 0 0;border-top:1px solid var(--gold-soft)}
+.spec div{display:grid;grid-template-columns:7.5em 1fr;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);align-items:baseline}
+.spec dt{font-size:12px;color:var(--muted);display:flex;flex-direction:column;line-height:1.4}
+.spec dt b{font-family:var(--font-brand);font-weight:400;font-size:11px;letter-spacing:.16em;color:var(--gold-ink);text-transform:uppercase}
+.spec dd{margin:0;font-size:14px;font-weight:500;min-width:0}
 .src{margin:10px 0 4px;font-size:13px;color:var(--muted)}
 .visit{
-  display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:999px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:999px;background:var(--accent);border:1px solid var(--gold);
   color:var(--accent-ink);text-decoration:none;font-weight:700;font-size:16px;letter-spacing:.12em;margin-top:12px;
 }
 .small{font-size:12px;color:var(--muted);margin:8px 0 0}
@@ -155,12 +189,23 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
 <body>
 
 
-<header class="band"><p class="brand">HAIR STYLE FINDER</p></header>
+<header class="band"><p class="salon">Beauty Haramachida</p><p class="brand">HAIR STYLE FINDER</p></header>
 
 <main class="wrap">
+  <ol class="steps" id="steps" aria-label="すすみぐあい">
+    <li data-s="gender"><span class="n">1</span>性別</li>
+    <li data-s="pick"><span class="n">2</span>条件</li>
+    <li data-s="results"><span class="n">3</span>スタイル</li>
+  </ol>
+
   <section id="v-gender">
-    <h1>どんな髪型を さがしますか？</h1>
-    <p class="lead">まず、どちらかを えらんでください。</p>
+    <div class="cover">
+      <p class="eyebrow">Style Catalog</p>
+      <h1>なりたい髪型を、<br>いっしょに見つけましょう。</h1>
+      <p class="lead">長さ・前髪・カラー・パーマから えらべます。</p>
+      <svg class="scissors" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="24" r="4"/><circle cx="23" cy="24" r="4"/><path d="M11.6 21 22 5M20.4 21 10 5"/></svg>
+    </div>
+    <div class="sec-title"><span class="en">Category</span><span class="jp">どちらの髪型？</span></div>
     <div class="genders" id="gender-cards"></div>
   </section>
 
@@ -174,8 +219,8 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
   <section id="v-results" hidden>
     <button class="back" id="back-pick" type="button">← 条件を かえる</button>
     <div class="card">
-      <div class="card-head"><span class="en">Result</span><span class="jp">さがした けっか</span></div>
-      <div class="count"><b id="count">12</b><span>けん</span></div>
+      <div class="card-head"><span class="en">Style Book</span><span class="jp">さがした けっか</span></div>
+      <div class="count"><b id="count">12</b><span>STYLES</span></div>
       <div class="sum" id="sum"></div>
       <p class="query" id="query"></p>
     </div>
@@ -192,10 +237,11 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
 </div>
 
 <div class="backdrop" id="backdrop" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-label="画像の拡大">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
     <div class="sheet-top"><span class="en" id="sheet-title"></span><button class="x" id="close" type="button" aria-label="とじる">✕</button></div>
     <div id="sheet-img"></div>
-    <div class="sum" id="sheet-tags"></div>
+    <p class="sheet-name" id="sheet-name"></p>
+    <dl class="spec" id="sheet-spec"></dl>
     <p class="src" id="sheet-src"></p>
     <a class="visit" id="visit" target="_blank" rel="noopener noreferrer" href="#">元のサイトを見る ↗</a>
     <p class="small">お試し版では、元のサイトのかわりに Google画像検索が ひらきます。</p>
@@ -286,8 +332,14 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
     return '<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'+p+'</svg>';
   }
 
+  var ORDER=['gender','pick','results'];
   function show(name){
-    ['gender','pick','results'].forEach(function(n){$('v-'+n).hidden=(n!==name)});
+    ORDER.forEach(function(n){$('v-'+n).hidden=(n!==name)});
+    var cur=ORDER.indexOf(name);
+    [].forEach.call($('steps').children,function(li,i){
+      li.className=i===cur?'on':(i<cur?'done':'');
+      if(i===cur)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');
+    });
     $('bar').hidden=(name!=='pick');
     window.scrollTo(0,0);
   }
@@ -299,7 +351,7 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
       women:'<svg viewBox="0 0 60 60" aria-hidden="true"><defs><linearGradient id="hG" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="52" y2="54"><stop offset="0" stop-color="#F0E0B0"/><stop offset=".5" stop-color="#B58F55"/><stop offset="1" stop-color="#E6D19C"/></linearGradient><linearGradient id="hF" gradientUnits="userSpaceOnUse" x1="30" y1="8" x2="30" y2="54"><stop offset="0" style="stop-color:var(--heart-a)"/><stop offset="1" style="stop-color:var(--heart-b)"/></linearGradient></defs><path transform="translate(30 31) scale(.94) translate(-30 -31)" d="M30 52C30 52 8 38.500 8 23C8 15.500 13.500 10 20.500 10C24.800 10 28.300 12.300 30 16C31.700 12.300 35.200 10 39.500 10C46.500 10 52 15.500 52 23C52 38.500 30 52 30 52Z" fill="url(#hF)" stroke="url(#hG)" stroke-width="1.5" stroke-linejoin="round"/></svg>'
     };
     ['men','women'].forEach(function(g){
-      h+='<button class="gcard" type="button" data-g="'+g+'"><span class="ico">'+ICONS[g]+'</span><span class="en">'+CONFIG[g].en+'</span><span class="jp">'+CONFIG[g].label+'</span></button>';
+      h+='<button class="gcard" type="button" data-g="'+g+'"><span class="ico">'+ICONS[g]+'</span><span class="en">For '+CONFIG[g].en+'</span><span class="jp">'+CONFIG[g].label+'</span><span class="sub">'+(g==='men'?'メンズスタイル':'レディーススタイル')+'</span><span class="arrow">えらぶ →</span></button>';
     });
     $('gender-cards').innerHTML=h;
     $('gender-cards').onclick=function(e){
@@ -354,24 +406,16 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
   function pickVal(arr,i,k){return arr[(i*(k+3)+k*5)%arr.length]}
 
   function buildResults(){
-    var cfg=CONFIG[state.gender],sel=state.sel,women=state.gender==='women';
-    var grp=function(key){return cfg.groups.filter(function(x){return x.key===key})[0]};
-    var val=function(key){var g=grp(key);return sel[key]!==undefined?g.opts[sel[key]][2]:null};
-    var list=[];
+    var cfg=CONFIG[state.gender],list=[];
     for(var i=0;i<12;i++){
-      var o={
-        gender:state.gender,seed:i,
-        length:val('length')||(women?pickVal(['short','bob','medium','long','semi','vshort'],i,1):pickVal(['short','medium','short','semi','vshort','long'],i,1)),
-        color:val('color')||pickVal(grp('color').opts,i,2)[2],
-        perm:val('perm')||pickVal(['straight','straight','perm','flip'],i,3)
-      };
-      if(women){o.bangs=val('bangs')||pickVal(['blunt','none','flow','see','center'],i,4)}
-      else{
-        o.side=val('side')||pickVal(['normal','short','long','normal'],i,4);
-        o.bangs=val('bangs')||pickVal(['none','flow','center','blunt'],i,5);
-        if(o.perm==='flip')o.perm='straight';
-      }
-      list.push({o:o,src:SOURCES[i%SOURCES.length],n:('0'+(i+1)).slice(-2)});
+      var o={gender:state.gender,seed:i},spec=[],words=[cfg.q];
+      cfg.groups.forEach(function(g,k){
+        var opt=state.sel[g.key]!==undefined?g.opts[state.sel[g.key]]:pickVal(g.opts,i,k+1);
+        o[g.key]=opt[2];spec.push({en:g.en,title:g.title,label:opt[0]});words.push(opt[1]);
+      });
+      words.push('髪型');
+      var name=spec.filter(function(x){return x.en==='Length'||x.en==='Color'}).map(function(x){return x.label}).join(' ・ ');
+      list.push({o:o,spec:spec,name:name,query:words.join(' '),src:SOURCES[i%SOURCES.length],n:('0'+(i+1)).slice(-2)});
     }
     return list;
   }
@@ -394,7 +438,7 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
       state.results=buildResults();
       $('count').textContent=String(state.results.length);
       $('grid').innerHTML=state.results.map(function(r,i){
-        return '<button class="tile" type="button" data-t="'+i+'" aria-label="見本 '+r.n+' を大きく見る">'+hairSvg(r.o)+'<small>見本 '+r.n+' ・ '+r.src+'</small></button>';
+        return '<button class="tile" type="button" data-t="'+i+'" aria-label="スタイル '+r.n+' '+r.name+' を大きく見る">'+hairSvg(r.o)+'<span class="cap"><span class="no">No.'+r.n+'</span><span class="nm">'+r.name+'</span><span class="from">'+r.src+'</span></span></button>';
       }).join('');
     },550);
   }
@@ -402,11 +446,12 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
   function openSheet(i,btn){
     var r=state.results[i];if(!r)return;
     lastTile=btn;
-    $('sheet-title').textContent='Sample '+r.n;
+    $('sheet-title').textContent='Style No.'+r.n;
     $('sheet-img').innerHTML=hairSvg(r.o);
-    $('sheet-tags').innerHTML='<span class="tag">'+CONFIG[state.gender].label+'</span>'+tagsHtml();
+    $('sheet-name').textContent=CONFIG[state.gender].label+'  '+r.name;
+    $('sheet-spec').innerHTML=r.spec.map(function(x){return '<div><dt><b>'+x.en+'</b>'+x.title+'</dt><dd>'+x.label+'</dd></div>'}).join('');
     $('sheet-src').textContent='のっている場所： '+r.src;
-    $('visit').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(state.query);
+    $('visit').href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(r.query);
     $('backdrop').hidden=false;
     document.body.style.overflow='hidden';
     $('close').focus();
@@ -429,6 +474,7 @@ h1{font-family:var(--font-serif);font-size:21px;font-weight:600;letter-spacing:.
   $('back-pick').addEventListener('click',function(){show('pick')});
 
   renderGender();
+  show('gender');
 })();
 </script>
 
